@@ -2,7 +2,6 @@
 import { prop, Typegoose, ModelType, InstanceType, index, Ref, arrayProp } from 'typegoose';
 import * as mongoose from 'mongoose';
 import { UserSession } from './UserSession';
-// import { UserSession } from './UserSession';
 
 class Location 
 {
@@ -49,6 +48,9 @@ export class User extends Typegoose {
 
     @prop()
     public passwordHash?: string;
+    
+    @prop()
+    public salt?: string;
 
     // @prop({ type: Number, dim: 2 })
     // @arrayProp({ items: Array })
