@@ -13,11 +13,5 @@ export class UserSession extends Typegoose {
     @prop()
     public token?: string;
 
-    constructor (user?: User, token?: string) {
-        super();
-        this.user = user;
-        this.token = token;
-    }
-
     public _id: mongoose.Types.ObjectId;
 }
