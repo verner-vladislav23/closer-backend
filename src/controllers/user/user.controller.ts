@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-import { Controller, Post, Req, Get } from '@nestjs/common';
+import { Controller, Post, Req, Get, Put, Delete } from '@nestjs/common';
 import { Request } from 'express';
 import { User } from 'src/models/User';
 
@@ -89,5 +89,22 @@ export class UserController {
           });
 
         return {status: 'ok', data: usersFound};
+    }
+    /**
+     * Logout
+     * @param request
+     */
+    @Put('test/logout')
+    async logout()
+    {
+
+    }
+    /**
+     * Удаление учетной записи
+     */
+    @Delete('test/delete')
+    async deleteAccount()
+    {
+
     }
 }
