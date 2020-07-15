@@ -38,7 +38,7 @@ export class AuthController {
     async register(@Request() req: Request)
     {
         //
-        
-        return req.user;
+        const token = "da";
+        return token;
     }
 }

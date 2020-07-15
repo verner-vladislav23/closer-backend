@@ -2,6 +2,7 @@
 import { prop, Typegoose, ModelType, InstanceType, index, Ref, arrayProp } from 'typegoose';
 import * as mongoose from 'mongoose';
 import { UserSession } from './UserSession';
+// import { UserSession } from './UserSession';
 
 class Location 
 {
