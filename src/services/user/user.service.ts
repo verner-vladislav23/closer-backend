@@ -4,15 +4,25 @@ import { User } from "src/models/User"
 @Injectable()
 export class UserService {
     
-    public async findOne(username:string): Promise<User | null> {
+    public async findUser(username: string): Promise<User | null> {
         const userModel = new User().getModelForClass(User);
         
-        let user = await userModel.findOne({username: username});
-
+        const user = await userModel.findOne({username: username});
         return user;
     }
 
+    /**
+     * Create User
+     * @param username 
+     * @param password 
+     */
+    public async create(user: User){
 
+        const userModel = new User().getModelForClass(User);
+
+        const userBd = await userModel.create(user);
+        userBd.save();
+    }
 
     public async findById(id: number): Promise<User | null> {
         const userModel = new User().getModelForClass(User);
@@ -20,7 +30,5 @@ export class UserService {
         const user = await userModel.findById(id);
         return user;
     }
-    //public async create
-    
 }
 

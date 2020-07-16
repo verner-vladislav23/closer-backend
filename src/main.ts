@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 
 import * as mongoose from 'mongoose';
 
-import DatabaseConfig from './config/db';
+import DatabaseConfig from 'src/config.example/db';
 
 async function bootstrap() {
 
@@ -15,7 +15,7 @@ async function bootstrap() {
   });
 
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  await app.listen(5005);
 }
 
 bootstrap();

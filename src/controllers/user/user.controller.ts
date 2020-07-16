@@ -1,8 +1,8 @@
-var _ = require('lodash');
-
 import { Controller, Post, Req, Get, Put, Delete } from '@nestjs/common';
 import { Request } from 'express';
 import { User } from 'src/models/User';
+
+const _ = require('lodash');
 
 @Controller('user')
 export class UserController {
@@ -18,7 +18,7 @@ export class UserController {
         const data = request.body;
 
         if(_.has(data, 'username') === false) {
-            return {status: 'error', message: 'please provide username'}
+            return {status: 'error', message: 'Please provide username'}
         }
 
         let user = await UserModel.findOne({username: data.username});

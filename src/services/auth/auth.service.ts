@@ -1,39 +1,60 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { JwtService } from '../jwt/jwt.service';
-import { UserSession } from "src/models/UserSession";
+import { User } from 'src/models/User';
 
-var crypto = require('crypto');
+const crypto = require('crypto');
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private userService: UserService,
-        private jwtService: JwtService
-        ) {}
+    constructor(private userService: UserService) {}
 
-    async validateUser(username: string, pass: string): Promise<string | null> {
-        const user = await this.userService.findOne(username);
+    /**
+     * Validate User
+     * @param username 
+     * @param pass 
+     */
+    async validateUser(username: string, pass: string): Promise<boolean> {
+        const user = await this.userService.findUser(username);
 
         if(!user) {
-            return null;
+            return false;
         }
 
         const passwordHash = crypto.createHash('sha256').update(pass + user.salt).digest('base64');
 
         if(passwordHash != user.passwordHash) {
-            return null;
+            return false;
         }
 
-        const payload = {username: user.username, sub: 'auth', id: user._id};
-        const token = this.jwtService.sign(payload);
+        return true;
+    }
 
-        const session = new UserSession(user, await token);
+    async register(data: any):Promise<string | null> {
 
-        //4e dalshe
-
-
-        return token;
+        const salt = crypto.randomBytes(32).toString('base64');
+        const passwordHash = crypto.createHash('sha256').update(data.password + salt).digest('base64');
         
+        const user = new User(
+            data.firstname,
+            data.lastname, 
+            data.username, 
+            passwordHash, 
+            salt, 
+            data.location
+            );
+
+        const userExists = this.userService.findUser(user.username);
+
+        if(userExists) {
+            return null;
+        }
+        else {
+            this.userService.create(user);
+            return this.getToken();
+        }
+    }
+
+    getToken() {
+        return crypto.randomBytes(32).toString('base64');
     }
 }

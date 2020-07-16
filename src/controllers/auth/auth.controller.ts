@@ -1,32 +1,35 @@
 import { Controller, Post, Request} from '@nestjs/common';
-import { AuthService } from "src/services/auth/auth.service";
+import { AuthService } from 'src/services/auth/auth.service';
+import { UserSession } from 'src/models/UserSession'
 
 
-var _ = require('lodash');
+const _ = require('lodash');
 
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) {}
 
     /**
-     * Авторизация
+     * Аутентификация пользователя
      * @param request
      */
-    @Post('auth/login')
+    @Post('login')
     async login(@Request() req)
     {
         const data = req.body;
         if(!_.has(data, 'username') || !_.has(data, 'password')) {
-            return {status: 'error', message: 'Заполните все поля'};
+            return {status: 'error', message: 'Fill in all the fields'};
         }
         
-        const token = await this.authService.validateUser(data.username, data.password);
+        const userValidated = await this.authService.validateUser(data.username, data.password);
 
-        if(token) {
+        if(userValidated) {
+            const token = this.authService.getToken();
+            const session = new UserSession(data, token);
             return token;
         }
         else {
-            return {status: 'error', message: 'Неправильный логин или пароль'};
+            return {status: 'error', message: 'Wrong username or password'};
         }
     }
 
@@ -34,11 +37,21 @@ export class AuthController {
      * Регистрация пользователя
      * @param req 
      */
-    @Post('auth/register')
-    async register(@Request() req: Request)
+    @Post('register')
+    async register(@Request() req)
     {
-        //
-        const token = "da";
-        return token;
+        const data = req.body;
+        if(!_.has(data, 'username') || !_.has(data, 'password')) {
+            return {status: 'error', message: 'Fill in all the fields'};
+        }
+
+        const token = this.authService.register(data);
+        
+        if(token) {
+            return token;
+        }
+        else {
+            return {status: 'error', message: 'User already created'};
+        }
     }
 }

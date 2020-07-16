@@ -2,7 +2,6 @@
 import { prop, Typegoose, ModelType, InstanceType, index, Ref, arrayProp } from 'typegoose';
 import * as mongoose from 'mongoose';
 import { UserSession } from './UserSession';
-// import { UserSession } from './UserSession';
 
 class Location 
 {
@@ -33,6 +32,16 @@ export class User extends Typegoose {
         const UserSessionModel = new UserSession().getModelForClass(UserSession);
     }
 
+    constructor(firstName?: string, lastName?: string, username?: string,
+        passwordHash?: string, salt?: string, location?: Location) {
+            super();
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.username = username;
+            this.passwordHash = passwordHash;
+            this.salt = salt;
+            this.location = location;
+        }
     @prop()
     public firstName?: string;
 

@@ -13,6 +13,9 @@ export class UserSession extends Typegoose {
     @prop()
     public token?: string;
 
+    @prop()
+    public expirationDate?: Date;
+
     constructor (user?: User, token?: string) {
         super();
         this.user = user;
