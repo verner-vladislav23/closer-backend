@@ -33,7 +33,7 @@ export class AuthService {
 
         const salt = crypto.randomBytes(32).toString('base64');
         const passwordHash = crypto.createHash('sha256').update(data.password + salt).digest('base64');
-        
+
         const user = new User(
             data.firstname,
             data.lastname, 
@@ -43,7 +43,8 @@ export class AuthService {
             data.location
             );
 
-        const userExists = this.userService.findUser(user.username);
+
+        const userExists = await this.userService.findUser(user.username);
 
         if(userExists) {
             return null;

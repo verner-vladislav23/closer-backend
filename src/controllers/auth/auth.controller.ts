@@ -1,6 +1,6 @@
 import { Controller, Post, Request} from '@nestjs/common';
 import { AuthService } from 'src/services/auth/auth.service';
-import { UserSession } from 'src/models/UserSession'
+import { UserSession } from 'src/models/UserSession';
 
 
 const _ = require('lodash');
@@ -17,11 +17,14 @@ export class AuthController {
     async login(@Request() req)
     {
         const data = req.body;
+
         if(!_.has(data, 'username') || !_.has(data, 'password')) {
             return {status: 'error', message: 'Fill in all the fields'};
         }
+
+        const {username, password} = data;
         
-        const userValidated = await this.authService.validateUser(data.username, data.password);
+        const userValidated = await this.authService.validateUser(username, password);
 
         if(userValidated) {
             const token = this.authService.getToken();
@@ -45,8 +48,9 @@ export class AuthController {
             return {status: 'error', message: 'Fill in all the fields'};
         }
 
-        const token = this.authService.register(data);
         
+        const token = await this.authService.register(data);
+
         if(token) {
             return token;
         }

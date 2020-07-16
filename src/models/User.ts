@@ -27,7 +27,6 @@ class Location
 @index({username: "text"}, {unique: true})
 export class User extends Typegoose {
 
-
     public getSessions = () => {
         const UserSessionModel = new UserSession().getModelForClass(UserSession);
     }
@@ -43,10 +42,10 @@ export class User extends Typegoose {
             this.location = location;
         }
     @prop()
-    public firstName?: string;
+    public firstName: string;
 
     @prop()
-    public lastName?: string;
+    public lastName: string;
 
     @prop({required: true})
     public username?: string;
@@ -57,18 +56,22 @@ export class User extends Typegoose {
     // public sessions?: Ref<UserSession>[];
 
     @prop()
-    public passwordHash?: string;
+    public passwordHash: string;
     
     @prop()
-    public salt?: string;
+    public salt: string;
 
     // @prop({ type: Number, dim: 2 })
     // @arrayProp({ items: Array })
     // location?: [[Number]]
     @prop()
-    location?: Location
+    location: Location
 
     public _id: mongoose.Types.ObjectId;
+}
+
+export function getUserModel() {
+    return new User().getModelForClass(User);
 }
 
 // @Entity()
