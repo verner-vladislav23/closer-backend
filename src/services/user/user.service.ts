@@ -22,7 +22,16 @@ export class UserService {
      */
     public async create(user: User){
         const userModel = getUserModel();
-        const userBd = await userModel.create(user);
+        await userModel.create(user);
+    }
+    
+    /**
+     * Delete User by id
+     * @param id 
+     */
+    public async deleteById(id: string) {
+        const userModel = getUserModel();
+        await userModel.deleteOne({id: id});
     }
 
     /*public async findById(id: number): Promise<User | null> {
