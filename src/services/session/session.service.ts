@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import SessionConfig from 'src/config.example/session'
+import SessionConfig from 'src/config/session'
 import { UserSession, getUserSessionModel } from '../../models/UserSession'
 import { User } from 'src/models/User';
 
