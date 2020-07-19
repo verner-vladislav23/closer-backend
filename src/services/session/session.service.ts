@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import SessionConfig from 'src/config.example/session'
 import { UserSession, getUserSessionModel } from '../../models/UserSession'
 import { User } from 'src/models/User';
 
@@ -27,11 +28,13 @@ export class SessionService {
      * @param token 
      */
     async createSession(user: User, token: string) {
+        const expires_at = new Date(new Date().getTime() + (1000*60*60*24)*SessionConfig.expirationDate);
+
         const sessionModel = getUserSessionModel();
-        const session = new UserSession(user, token);
+        const session = new UserSession(user, token, expires_at);
+        
         sessionModel.create(session);
     }
-
 
     /*async refreshSession(id: number) {
 

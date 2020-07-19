@@ -14,13 +14,13 @@ export class UserSession extends Typegoose {
     public token?: string;
 
     @prop()
-    private expirationDate?: Date;
+    private expires_at?: Date;
 
-    constructor (user?: User, token?: string, expirationDate?: Date) {
+    constructor (user?: User, token?: string, expires_at?: Date) {
         super();
         this.user = user;
         this.token = token;
-        this.expirationDate = expirationDate;
+        this.expires_at = expires_at;
     }
 
     public _id: mongoose.Types.ObjectId;
