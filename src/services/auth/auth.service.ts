@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { User } from 'src/models/User';
+import { SessionService } from '../session/session.service';
 
 const crypto = require('crypto');
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UserService) {}
+    constructor(private userService: UserService, private sessionService: SessionService) {}
 
     /**
      * Validate User
@@ -48,10 +49,11 @@ export class AuthService {
 
         if(userExists) {
             return null;
-        }
-        else {
-            this.userService.create(user);
-            return this.getToken();
+        } else {
+            await this.userService.create(user);
+            const token = this.getToken();
+            await  this.sessionService.createSession(user, token);
+            return token;
         }
     }
 

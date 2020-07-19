@@ -18,7 +18,7 @@ export class SessionService {
      */
     async deleteSession(userSession: UserSession) {
         const sessionModel = getUserSessionModel();
-        sessionModel.deleteOne(userSession);
+        await sessionModel.deleteOne(userSession);
     }
 
     /**
