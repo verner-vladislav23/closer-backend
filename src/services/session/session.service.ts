@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import SessionConfig from 'src/config/session'
 import { UserSession, getUserSessionModel } from '../../models/UserSession'
-import { User } from 'src/models/User';
+import { ObjectID } from 'mongodb';
 
 @Injectable()
 export class SessionService {
 
     async findSession(token: string): Promise<UserSession> {
         const sessionModel = getUserSessionModel();
-        const session = sessionModel.findOne({token: token});
+        const session = sessionModel.findOne({ token: token });
 
         return session;
     }
@@ -27,16 +27,30 @@ export class SessionService {
      * @param user 
      * @param token 
      */
-    async createSession(user: User, token: string) {
-        const expires_at = new Date(new Date().getTime() + (1000*60*60*24)*SessionConfig.expirationDate);
+    async createSession(user_id: ObjectID, token: string) {
+        const expires_at = new Date(new Date().getTime() + (1000 * 60 * 60 * 24) * SessionConfig.expirationDate);
 
         const sessionModel = getUserSessionModel();
-        const session = new UserSession(user, token, expires_at);
-        
+        const session = new UserSession();
+
+        session.user_id = user_id;
+        session.token = token;
+        session.expires_at = expires_at;
+
         sessionModel.create(session);
     }
 
-    /*async refreshSession(id: number) {
+    /**
+     * Has session date not expired
+     * @param session 
+     */
+    async validateSession(session: UserSession): Promise<boolean> {
+        const sessionExpiresAt = session.expires_at;
+        const today = new Date();
 
-    }*/
+        if (sessionExpiresAt > today) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -31,16 +31,6 @@ export class User extends Typegoose {
         const UserSessionModel = new UserSession().getModelForClass(UserSession);
     }
 
-    constructor(firstName?: string, lastName?: string, username?: string,
-        passwordHash?: string, salt?: string, location?: Location) {
-            super();
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.username = username;
-            this.passwordHash = passwordHash;
-            this.salt = salt;
-            this.location = location;
-        }
     @prop()
     public firstName: string;
 
@@ -49,11 +39,6 @@ export class User extends Typegoose {
 
     @prop({required: true})
     public username?: string;
-
-    // @prop({ref: UserSession,
-    //     foreignField: 'sessions',
-    //     localField: '_id'})
-    // public sessions?: Ref<UserSession>[];
 
     @prop()
     public passwordHash: string;

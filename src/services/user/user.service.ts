@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User, getUserModel } from "src/models/User"
+import { ObjectID } from 'mongodb';
 
 @Injectable()
 export class UserService {
@@ -20,9 +21,11 @@ export class UserService {
      * @param username 
      * @param password 
      */
-    public async create(user: User){
+    public async create(user: User): Promise<User | null>{
         const userModel = getUserModel();
-        await userModel.create(user);
+        const userBD = await userModel.create(user);
+
+        return userBD;
     }
     
     /**
@@ -34,11 +37,11 @@ export class UserService {
         await userModel.deleteOne({id: id});
     }
 
-    /*public async findById(id: number): Promise<User | null> {
-        const userModel = new User().getModelForClass(User);
+    public async findById(id: ObjectID): Promise<User | null> {
+        const userModel = getUserModel();
 
         const user = await userModel.findById(id);
         return user;
-    }*/
+    }
 }
 

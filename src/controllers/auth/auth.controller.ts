@@ -1,43 +1,47 @@
-import { Controller, Post, Request, Put, Response} from '@nestjs/common';
+import { Controller, Post, Request, Put, Response } from '@nestjs/common';
 import { AuthService } from 'src/services/auth/auth.service';
-import { UserSession } from 'src/models/UserSession';
+import ResponseStatus from '../responseStatus'
 import { SessionService } from 'src/services/session/session.service';
 import { UserService } from 'src/services/user/user.service';
+import * as Schemes from 'src/schemes/user.schemes';
 
 
 const _ = require('lodash');
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService, private sessionService: SessionService, private userService: UserService) {}
+    constructor(
+        private authService: AuthService,
+        private sessionService: SessionService,
+        private userService: UserService) { }
 
     /**
      * Аутентификация пользователя
      * @param request
      */
     @Post('login')
-    async login(@Request() req)
-    {
+    async login(@Request() req) {
         const data = req.body;
 
-        if(!_.has(data, 'username') || !_.has(data, 'password')) {
-            return {status: 'error', message: 'Fill in all the fields'};
+        try {
+            await Schemes.loginSchema.validateAsync(data);
+        } catch (exception) {
+            return { status: ResponseStatus.ERROR, message: exception.details[0].message };
         }
 
-        const {username, password} = data;
-        
+        const { username, password } = data;
+
         const userValidated = await this.authService.validateUser(username, password);
 
-        if(userValidated) {
+        if (userValidated) {
             const token = this.authService.getToken();
             const user = await this.userService.findUser(username);
 
-            await this.sessionService.createSession(user, token);
-
+            await this.sessionService.createSession(user._id, token);
             return token;
         }
         else {
-            return {status: 'error', message: 'Wrong username or password'};
+            return { status: ResponseStatus.ERROR, message: 'Wrong username or password' };
         }
     }
 
@@ -46,41 +50,42 @@ export class AuthController {
      * @param req 
      */
     @Post('register')
-    async register(@Request() req)
-    {
+    async register(@Request() req) {
         const data = req.body;
-        if(!_.has(data, 'username') || !_.has(data, 'password')) {
-            return {status: 'error', message: 'Fill in all the fields'};
+
+        try {
+            await Schemes.registerSchema.validateAsync(data);
+        } catch (exception) {
+            return { status: ResponseStatus.ERROR, message: exception.details[0].message };
         }
 
-        
-        const token = await this.authService.register(data);
+        const { firstName, lastName, userName, password } = data;
 
-        if(token) {
+        const token = await this.authService.register(firstName, lastName, userName, password);
+        if (token) {
             return token;
         }
         else {
-            return {status: 'error', message: 'User already created'};
+            return { status: ResponseStatus.ERROR, message: 'User already created' };
         }
     }
 
     @Put('logout')
-    async logout(@Request() req, @Response() res)
-    {
+    async logout(@Request() req, @Response() res) {
         const authToken = _.get(req.headers, 'x-auth-token', null);
 
-        if(authToken !== null) {
+        if (authToken !== null) {
             let session = await this.sessionService.findSession(authToken);
-            if(session !== null) {
+            if (session !== null) {
                 await this.sessionService.deleteSession(session);
-                res.json({status: 'ok'});
+                res.json({ status: 'ok' });
                 res.send();
                 return;
             }
         }
 
         res.status(401);
-        res.json({status: 'error', message: 'unauthorized'});
+        res.json({ status: ResponseStatus.ERROR, message: 'unauthorized' });
         res.send();
         return;
     }

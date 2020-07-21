@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UserService, private sessionService: SessionService) {}
+    constructor(private userService: UserService, private sessionService: SessionService) { }
 
     /**
      * Validate User
@@ -17,44 +17,59 @@ export class AuthService {
     async validateUser(username: string, pass: string): Promise<boolean> {
         const user = await this.userService.findUser(username);
 
-        if(!user) {
+        if (!user) {
             return false;
         }
 
         const passwordHash = crypto.createHash('sha256').update(pass + user.salt).digest('base64');
 
-        if(passwordHash != user.passwordHash) {
+        if (passwordHash != user.passwordHash) {
             return false;
         }
 
         return true;
     }
 
-    async register(data: any):Promise<string | null> {
+    async register(firstName: string, lastName: string, userName: string, password: string): Promise<string | null> {
 
         const salt = crypto.randomBytes(32).toString('base64');
-        const passwordHash = crypto.createHash('sha256').update(data.password + salt).digest('base64');
+        const passwordHash = crypto.createHash('sha256').update(password + salt).digest('base64');
 
-        const user = new User(
-            data.firstname,
-            data.lastname, 
-            data.username, 
-            passwordHash, 
-            salt, 
-            data.location
-            );
+        let user = new User();
 
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.username = userName;
+        user.passwordHash = passwordHash;
+        user.salt = salt;
 
         const userExists = await this.userService.findUser(user.username);
 
-        if(userExists) {
+        if (userExists) {
             return null;
         } else {
-            await this.userService.create(user);
+            user = await this.userService.create(user);
             const token = this.getToken();
-            await  this.sessionService.createSession(user, token);
+            await this.sessionService.createSession(user._id, token);
             return token;
         }
+    }
+
+    async getAuthorizedUser(token: string): Promise<User | null> {
+        const session = await this.sessionService.findSession(token);
+
+        if(!session) {
+            return null;
+        }
+
+        const validated = await this.sessionService.validateSession(session);
+        if(!validated) {
+            await this.sessionService.deleteSession(session);
+            return null;
+        }
+        
+        const user = this.userService.findById(session.user_id);
+        return user;
     }
 
     getToken() {

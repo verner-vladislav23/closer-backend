@@ -5,25 +5,16 @@ import { User } from './User';
 @index({token: "text"}, {unique: true})
 export class UserSession extends Typegoose {
     
-    @prop({ ref: User,
-    foreignField: 'user',
-    localField: '_id', })
-    public user!: Ref<User>;
+    public _id: mongoose.Types.ObjectId;
+
+    @prop()
+    public user_id: mongoose.Types.ObjectId;
 
     @prop()
     public token?: string;
 
     @prop()
-    private expires_at?: Date;
-
-    constructor (user?: User, token?: string, expires_at?: Date) {
-        super();
-        this.user = user;
-        this.token = token;
-        this.expires_at = expires_at;
-    }
-
-    public _id: mongoose.Types.ObjectId;
+    public expires_at?: Date;
 }
 
 export function getUserSessionModel() {

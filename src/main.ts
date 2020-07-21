@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 
 import * as mongoose from 'mongoose';
 
-import DatabaseConfig from 'src/config.example/db';
+import DatabaseConfig from 'src/config/db';
 
 async function bootstrap() {
 
