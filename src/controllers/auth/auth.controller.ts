@@ -59,9 +59,9 @@ export class AuthController {
             return { status: ResponseStatus.ERROR, message: exception.details[0].message };
         }
 
-        const { firstName, lastName, userName, password } = data;
+        const { firstName, lastName, username, password } = data;
 
-        const token = await this.authService.register(firstName, lastName, userName, password);
+        const token = await this.authService.register(firstName, lastName, username, password);
         if (token) {
             return token;
         }

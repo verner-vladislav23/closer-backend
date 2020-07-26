@@ -30,7 +30,7 @@ export class AuthService {
         return true;
     }
 
-    async register(firstName: string, lastName: string, userName: string, password: string): Promise<string | null> {
+    async register(firstName: string, lastName: string, username: string, password: string): Promise<string | null> {
 
         const salt = crypto.randomBytes(32).toString('base64');
         const passwordHash = crypto.createHash('sha256').update(password + salt).digest('base64');
@@ -39,7 +39,7 @@ export class AuthService {
 
         user.firstName = firstName;
         user.lastName = lastName;
-        user.username = userName;
+        user.username = username;
         user.passwordHash = passwordHash;
         user.salt = salt;
 
