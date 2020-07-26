@@ -48,7 +48,7 @@ export class SessionService {
         const sessionExpiresAt = session.expires_at;
         const today = new Date();
 
-        if (sessionExpiresAt > today) {
+        if (sessionExpiresAt < today) {
             return false;
         }
         return true;

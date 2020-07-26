@@ -7,7 +7,10 @@ const crypto = require('crypto');
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UserService, private sessionService: SessionService) { }
+
+    public user?: User | null = null;
+
+    constructor(private userService: UserService, private sessionService: SessionService) {}
 
     /**
      * Validate User

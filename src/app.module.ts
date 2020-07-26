@@ -7,6 +7,9 @@ import { AuthController } from './controllers/auth/auth.controller';
 import { AuthService } from './services/auth/auth.service';
 import { SessionService } from './services/session/session.service';
 import { AuthMiddleware } from './middlewares/auth.middleware';
+import { RejectUnauthorizedMiddleware } from './reject-unauthorized.middleware';
+
+const authorizedRoutes = ['user'];
 
 @Module({
   imports: [],
@@ -17,6 +20,9 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .forRoutes('auth');
+      .forRoutes(...authorizedRoutes);
+    consumer
+      .apply(RejectUnauthorizedMiddleware)
+      .forRoutes(...authorizedRoutes);
   }
 }
