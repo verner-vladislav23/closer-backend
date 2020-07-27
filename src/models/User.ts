@@ -30,6 +30,8 @@ export class User extends Typegoose {
     public getSessions = () => {
         const UserSessionModel = new UserSession().getModelForClass(UserSession);
     }
+    @prop()
+    public email: string;
 
     @prop()
     public firstName: string;

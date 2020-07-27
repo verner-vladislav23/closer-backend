@@ -5,7 +5,6 @@ import { SessionService } from 'src/services/session/session.service';
 import { AuthService } from 'src/services/auth/auth.service';
 import * as Schemes from 'src/schemes/user.schemes';
 import ResponseStatus from '../responseStatus'
-import responseStatus from '../responseStatus';
 
 const _ = require('lodash');
 
@@ -46,17 +45,18 @@ export class UserController {
         const data = request.query;
 
         if (_.has(data, 'username') === false) {
-            return { status: responseStatus.ERROR, message: 'please provide username' }
+            return { status: ResponseStatus.ERROR, message: 'please provide username' }
         }
 
         const username = data['username'].toString();
         const user = await this.userService.findUser(username);
 
         if (user === null) {
-            return { status: responseStatus.OK, message: `no user '${data.username}' was found` }
+            return { status: ResponseStatus.OK, message: `no user '${data.username}' was found` }
         }
 
-        return { status: responseStatus.OK, data: user };
+        const customUser = this.userService.castUser(user);
+        return { status: ResponseStatus.OK, data: customUser };
     }
 
     /**
@@ -67,9 +67,10 @@ export class UserController {
     async findNear() {
         const user = this.authService.user;
 
-        const usersFound = await this.userService.findNear(user);
-        
-        return { status: responseStatus.OK, data: usersFound };
+        let usersFound = await this.userService.findNear(user);
+        const customUsers  = usersFound.map(this.userService.castUser);
+
+        return { status: ResponseStatus.OK, data: customUsers };
     }
 
     @Post('update-location')
@@ -87,8 +88,8 @@ export class UserController {
 
         user.location.coordinates = [latitude, longitude];
 
-        this.userService.update(user);
-        return { status: responseStatus.OK };
+        this.userService.updateUserLocation(user);
+        return { status: ResponseStatus.OK };
     }
 
 

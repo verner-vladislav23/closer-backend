@@ -16,10 +16,14 @@ export class UserService {
         return user;
     }
 
+    /**
+     * Find users near
+     * @param user 
+     */
     public async findNear(user: User) {
         const userModel = getUserModel();
 
-        const usersFound = userModel.find({
+        const usersFound = await userModel.find({
             _id: { $ne: user._id },
             location:
             {
@@ -31,7 +35,21 @@ export class UserService {
                 }
             }
         });
+
         return usersFound;
+    }
+
+    /**
+     * Cast DB user to schema user
+     * @param user 
+     */
+    public castUser(user: User) {
+        return {
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
+        }
     }
 
     /**
@@ -46,7 +64,12 @@ export class UserService {
         return userBD;
     }
 
-    public async update(user: User) {
+
+    /**
+     * Update user location
+     * @param user 
+     */
+    public async updateUserLocation(user: User) {
         const userModel = getUserModel();
 
         await userModel.updateOne({
