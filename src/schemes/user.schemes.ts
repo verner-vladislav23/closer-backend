@@ -12,3 +12,10 @@ export const registerSchema = Joi.object({
     password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9@$!%*#?&]{3,30}$')).required(),
     email: Joi.string().email().required()
 })
+
+export const updateLocation = Joi.object({
+    location: {
+        latitude: Joi.number().required(),
+        longitude: Joi.number().required()
+    }
+})

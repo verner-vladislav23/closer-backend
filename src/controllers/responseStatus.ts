@@ -1,3 +1,4 @@
 export default {
-    ERROR: 'error'
+    ERROR: 'error',
+    OK: 'ok'
 }
