@@ -3,13 +3,11 @@ import { prop, Typegoose, ModelType, InstanceType, index, Ref, arrayProp } from 
 import * as mongoose from 'mongoose';
 import { UserSession } from './UserSession';
 
-class Location 
-{
-
-    @prop({enum: ['Point'], required: true})
+class Location {
+    @prop({ enum: ['Point'], required: true })
     public type?: String
 
-    @prop({required: true})
+    @prop({ required: true })
     public coordinates?: [Number, Number]
 
     // type: {
@@ -21,10 +19,10 @@ class Location
     //   type: [Number],
     //   required: true
     // }
-  }
+}
 
 @index({ location: '2dsphere' })
-@index({username: "text"}, {unique: true})
+@index({ username: "text" }, { unique: true })
 export class User extends Typegoose {
 
     public getSessions = () => {
@@ -39,12 +37,12 @@ export class User extends Typegoose {
     @prop()
     public lastName: string;
 
-    @prop({required: true})
+    @prop({ required: true })
     public username?: string;
 
     @prop()
     public passwordHash: string;
-    
+
     @prop()
     public salt: string;
 
@@ -57,14 +55,15 @@ export class User extends Typegoose {
     public _id: mongoose.Types.ObjectId;
 }
 
-export function getUserModel() {
-    return new User().getModelForClass(User);
-}
+const UserModel = new User().getModelForClass(User)
+
+export { UserModel };
+
 
 // @Entity()
 // export class User {
 
-    
+
 //     @ObjectIdColumn()
 //     id: ObjectID;
 
@@ -80,5 +79,5 @@ export function getUserModel() {
 //     @Column()
 //     passwordHash: string;
 
-    
+
 // }
