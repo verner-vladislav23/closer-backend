@@ -4,6 +4,7 @@ import ResponseStatus from '../responseStatus'
 import { SessionService } from 'src/services/session/session.service';
 import { UserService } from 'src/services/user/user.service';
 import * as Schemes from 'src/schemes/user.schemes';
+import responseStatus from '../responseStatus';
 
 
 const _ = require('lodash');
@@ -38,7 +39,7 @@ export class AuthController {
             const user = await this.userService.findUser(username);
 
             await this.sessionService.createSession(user._id, token);
-            return token;
+            return { status: responseStatus.OK, data: token }
         }
         else {
             return { status: ResponseStatus.ERROR, message: 'Wrong username or password' };
@@ -63,7 +64,7 @@ export class AuthController {
 
         const token = await this.authService.register(firstName, lastName, username, password);
         if (token) {
-            return token;
+            return { status: ResponseStatus.OK, data: token }
         }
         else {
             return { status: ResponseStatus.ERROR, message: 'User already created' };

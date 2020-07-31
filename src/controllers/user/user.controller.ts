@@ -67,7 +67,7 @@ export class UserController {
     async findNear() {
         const user = this.authService.user;
 
-        let usersFound = await this.userService.findNear(user);
+        const usersFound = await this.userService.findNear(user);
         const customUsers  = usersFound.map(this.userService.castUser);
 
         return { status: ResponseStatus.OK, data: customUsers };
