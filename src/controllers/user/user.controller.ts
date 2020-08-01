@@ -68,7 +68,7 @@ export class UserController {
         const user = this.authService.user;
 
         const usersFound = await this.userService.findNear(user);
-        const customUsers  = usersFound.map(this.userService.castUser);
+        const customUsers = usersFound.map(this.userService.castUser);
 
         return { status: ResponseStatus.OK, data: customUsers };
     }
@@ -83,35 +83,10 @@ export class UserController {
             return { status: ResponseStatus.ERROR, message: exception.details[0].message };
         }
 
-        const { latitude, longitude } = data.location;
         let user = this.authService.user;
 
-        user.location.coordinates = [latitude, longitude];
-
-        this.userService.updateUserLocation(user);
+        this.userService.updateLocation(user._id, data.location);
         return { status: ResponseStatus.OK };
     }
 
-
-    /**
-     * Logout
-     * @param request
-     */
-    @Put('logout')
-    async logout(@Req() req: Request) {
-        //todo get token
-        const token = 'da';
-        try {
-            const session = await this.sessionService.findSession(token);
-
-            if (session) {
-                this.sessionService.deleteSession(session);
-            } else {
-                //todo
-            }
-        } catch {
-            //todo
-        }
-
-    }
 }

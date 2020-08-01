@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import UserModel, { User } from 'src/models/User'
 import { ObjectID } from 'mongodb';
+import * as mongoose from 'mongoose';
+const _ = require('lodash')
 
 @Injectable()
 export class UserService {
@@ -20,6 +22,10 @@ export class UserService {
      * @param user 
      */
     public async findNear(user: User) {
+
+        if(_.has(user, 'location') === false) {
+            return []
+        }
 
         const usersFound = await UserModel.find({
             _id: { $ne: user._id },
@@ -66,16 +72,12 @@ export class UserService {
      * Update user location
      * @param user 
      */
-    public async updateUserLocation(user: User) {
-        await UserModel.updateOne({
-            _id: user._id
-        },
-            {
-                $set: {
-                    location: user.location
-                }
-            }
-        );
+    public async updateLocation(_id: mongoose.Types.ObjectId, coordinates: {longitude: number, latitude: number}) {
+        const location: {type: string, coordinates: [number, number]} = {
+            type: 'Point',
+            coordinates: [coordinates.longitude, coordinates.latitude]
+        };
+        return await UserModel.updateOne({_id}, { location } );
     }
 
 

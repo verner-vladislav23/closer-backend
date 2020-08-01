@@ -14,9 +14,6 @@ class Location {
 @index({ username: "text" }, { unique: true })
 export class User extends Typegoose {
 
-    public getSessions = () => {
-        const UserSessionModel = new UserSession().getModelForClass(UserSession);
-    }
     @prop()
     public email: string;
 
