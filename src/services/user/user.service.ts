@@ -23,7 +23,9 @@ export class UserService {
      */
     public async findNear(user: User) {
 
-        if(_.has(user, 'location') === false) {
+        const location = _.get(user, 'location', null)
+
+        if(location === null) {
             return []
         }
 
@@ -33,7 +35,7 @@ export class UserService {
             {
                 $near:
                 {
-                    $geometry: user.location,
+                    $geometry: location,
                     $minDistance: 0,
                     $maxDistance: 50
                 }
