@@ -7,8 +7,7 @@ import { ObjectID } from 'mongodb';
 export class SessionService {
 
     async findSession(token: string): Promise<UserSession> {
-        const sessionModel = UserSessionModel;
-        const session = sessionModel.findOne({ token: token });
+        const session = UserSessionModel.findOne({ token: token });
 
         return session;
     }
@@ -18,8 +17,7 @@ export class SessionService {
      * @param id 
      */
     async deleteSession(userSession: UserSession) {
-        const sessionModel = UserSessionModel;
-        await sessionModel.deleteOne(userSession);
+        await UserSessionModel.deleteOne(userSession);
     }
 
     /**
@@ -30,14 +28,13 @@ export class SessionService {
     async createSession(user_id: ObjectID, token: string) {
         const expires_at = new Date(new Date().getTime() + (1000 * 60 * 60 * 24) * SessionConfig.expirationDate);
 
-        const sessionModel = UserSessionModel;
         const session = new UserSession();
 
         session.user_id = user_id;
         session.token = token;
         session.expires_at = expires_at;
 
-        sessionModel.create(session);
+        UserSessionModel.create(session);
     }
 
     /**

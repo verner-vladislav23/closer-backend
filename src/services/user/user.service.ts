@@ -10,8 +10,7 @@ export class UserService {
      * @param username 
      */
     public async findUser(username: string): Promise<User | null> {
-        const userModel = UserModel;
-        const user = await userModel.findOne({ username: username });
+        const user = await UserModel.findOne({ username: username });
 
         return user;
     }
@@ -21,9 +20,8 @@ export class UserService {
      * @param user 
      */
     public async findNear(user: User) {
-        const userModel = UserModel;
 
-        const usersFound = await userModel.find({
+        const usersFound = await UserModel.find({
             _id: { $ne: user._id },
             location:
             {
@@ -58,8 +56,7 @@ export class UserService {
      * @param password 
      */
     public async create(user: User): Promise<User | null> {
-        const userModel = UserModel;
-        const userBD = await userModel.create(user);
+        const userBD = await UserModel.create(user);
 
         return userBD;
     }
@@ -70,9 +67,7 @@ export class UserService {
      * @param user 
      */
     public async updateUserLocation(user: User) {
-        const userModel = UserModel;
-
-        await userModel.updateOne({
+        await UserModel.updateOne({
             _id: user._id
         },
             {
@@ -89,14 +84,11 @@ export class UserService {
      * @param id 
      */
     public async deleteById(id: string) {
-        const userModel = UserModel;
-        await userModel.deleteOne({ id: id });
+        await UserModel.deleteOne({ id: id });
     }
 
     public async findById(id: ObjectID): Promise<User | null> {
-        const userModel = UserModel;
-
-        const user = await userModel.findById(id);
+        const user = await UserModel.findById(id);
         return user;
     }
 }
