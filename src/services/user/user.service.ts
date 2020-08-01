@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserModel } from 'src/models/User'
+import UserModel, { User } from 'src/models/User'
 import { ObjectID } from 'mongodb';
 
 @Injectable()
