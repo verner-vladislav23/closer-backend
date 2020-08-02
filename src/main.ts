@@ -3,7 +3,8 @@ import { AppModule } from './app.module';
 
 import * as mongoose from 'mongoose';
 
-import DatabaseConfig from './config/db';
+import DatabaseConfig from 'src/config/db';
+import CorsConfig from 'src/config/cors';
 
 async function bootstrap() {
 
@@ -15,6 +16,7 @@ async function bootstrap() {
   });
 
   const app = await NestFactory.create(AppModule);
+  app.enableCors(CorsConfig);
   await app.listen(3000);
 }
 

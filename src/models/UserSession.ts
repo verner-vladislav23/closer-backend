@@ -1,17 +1,20 @@
 import { prop, Typegoose, ModelType, InstanceType, index, Ref } from 'typegoose';
 import * as mongoose from 'mongoose';
-import { User } from './User';
 
 @index({token: "text"}, {unique: true})
 export class UserSession extends Typegoose {
     
-    @prop({ ref: User,
-    foreignField: 'user',
-    localField: '_id', })
-    public user!: Ref<User>;
+    public _id: mongoose.Types.ObjectId;
+
+    @prop()
+    public user_id: mongoose.Types.ObjectId;
 
     @prop()
     public token?: string;
 
-    public _id: mongoose.Types.ObjectId;
+    @prop()
+    public expires_at?: Date;
 }
+
+const UserSessionModel = new UserSession().getModelForClass(UserSession);
+export default UserSessionModel;
