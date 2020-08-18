@@ -24,7 +24,7 @@ export class AuthService {
             return false;
         }
 
-        const passwordHash = crypto.createHash('sha256').update(pass + user.salt).digest('base64');
+        const passwordHash = await this.getHash(pass, user.salt);
 
         if (passwordHash != user.passwordHash) {
             return false;
@@ -33,10 +33,14 @@ export class AuthService {
         return true;
     }
 
+    async getHash(password: string, salt: string) {
+        return crypto.createHash('sha256').update(password + salt).digest('base64');
+    }
+
     async register(firstName: string, lastName: string, username: string, password: string): Promise<string | null> {
 
         const salt = crypto.randomBytes(32).toString('base64');
-        const passwordHash = crypto.createHash('sha256').update(password + salt).digest('base64');
+        const passwordHash = await this.getHash(password, salt);
 
         let user = new User();
 

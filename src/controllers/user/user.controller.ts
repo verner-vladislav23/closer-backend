@@ -1,10 +1,11 @@
-import { Controller, Post, Req, Get, Put, Delete } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Post, Get, Put, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UserService } from 'src/services/user/user.service';
-import { SessionService } from 'src/services/session/session.service';
 import { AuthService } from 'src/services/auth/auth.service';
 import * as Schemes from 'src/schemes/user.schemes';
-import ResponseStatus from '../responseStatus'
+import { BufferedFile } from 'src/models/File';
+import { FileInterceptor } from '@nestjs/platform-express'
+import responseStatus from '../responseStatus';
+import { FileUploadService } from 'src/services/minio/file-upload/file-upload.service';
 
 const _ = require('lodash');
 
@@ -12,51 +13,77 @@ const _ = require('lodash');
 export class UserController {
     constructor(
         private userService: UserService,
-        private sessionService: SessionService,
-        private authService: AuthService
+        private authService: AuthService,
+        private fileUploadService: FileUploadService
     ) { }
-
-    /**
-     * Delete user
-     * @param req 
-     */
-    @Delete('delete')
-    async deleteUser(@Req() req: Request) {
-        const data = req.body;
-        const id = data.id;
-
-        try {
-            //this.userService.deleteById(id);
-            const userSession = await this.sessionService.findSession(id);
-            //this.userService.deleteById(userSession.user.) 
-            this.sessionService.deleteSession(userSession);
-        } catch {
-            //todo
-        }
-
-    }
 
     /**
      * Get user profile information 
      * @param request 
      */
     @Get('profile')
-    async getDetail(@Req() request: Request) {
+    async getDetail(@Request() request) {
         const data = request.query;
 
         if (_.has(data, 'username') === false) {
-            return { status: ResponseStatus.ERROR, message: 'please provide username' }
+            return { status: responseStatus.ERROR, message: 'please provide username' }
         }
 
         const username = data['username'].toString();
         const user = await this.userService.findUser(username);
 
         if (user === null) {
-            return { status: ResponseStatus.OK, message: `no user '${data.username}' was found` }
+            return { status: responseStatus.OK, message: `no user '${data.username}' was found` }
         }
 
         const customUser = this.userService.castUser(user);
-        return { status: ResponseStatus.OK, data: customUser };
+        return { status: responseStatus.OK, data: customUser };
+    }
+
+    @Put('change-avatar')
+    @UseInterceptors(FileInterceptor('avatar'))
+    async updateAvatar(@UploadedFile() image: BufferedFile) {
+        const previousImage_url = this.authService.user.avatarUrl;
+
+        try {
+            if (previousImage_url != null) {
+                if (previousImage_url.length > 0) {
+                    this.fileUploadService.deleteImage(previousImage_url);
+                    this.authService.user.avatarUrl = "";
+                }
+            }
+            const image_url = await this.fileUploadService.uploadImage(image);
+            const userId = this.authService.user._id;
+
+            this.authService.user = await this.userService.updateAvatarUrl(userId, image_url);
+            return { status: responseStatus.OK };
+        } catch (exception) {
+            return { status: responseStatus.ERROR, message: exception.details[0].message };
+        }
+    }
+
+    @Put('update-profile')
+    async updateProfile(@Request() req) {
+        const data = req.body;
+
+        try {
+            await Schemes.updateProfile.validateAsync(data);
+        } catch (exception) {
+            return { status: responseStatus.ERROR, message: exception.details[0].message };
+        }
+
+        const user = this.authService.user;
+
+        user.firstName = data.firstName;
+        user.lastName = data.lastName;
+        user.description = data.description;
+        user.email = data.email;
+
+        const userId = this.authService.user._id;
+
+        this.authService.user = await this.userService.updateProfile(userId, user);
+
+        return { status: responseStatus.OK };
     }
 
     /**
@@ -70,23 +97,47 @@ export class UserController {
         const usersFound = await this.userService.findNear(user);
         const customUsers = usersFound.map(this.userService.castUser);
 
-        return { status: ResponseStatus.OK, data: customUsers };
+        return { status: responseStatus.OK, data: customUsers };
     }
 
     @Post('update-location')
-    async updateLocation(@Req() request: Request) {
+    async updateLocation(@Request() request) {
         const data = request.body;
 
         try {
             await Schemes.updateLocation.validateAsync(data);
         } catch (exception) {
-            return { status: ResponseStatus.ERROR, message: exception.details[0].message };
+            return { status: responseStatus.ERROR, message: exception.details[0].message };
         }
 
-        let user = this.authService.user;
+        const user = this.authService.user;
 
-        this.userService.updateLocation(user._id, data.location);
-        return { status: ResponseStatus.OK };
+        this.authService.user = await this.userService.updateLocation(user._id, data.location);
+        return { status: responseStatus.OK };
+    }
+
+    @Put('change-password')
+    async changePassword(@Request() request) {
+        const data = request.body;
+
+        try {
+            await Schemes.changePassword.validateAsync(data);
+        } catch (exception) {
+            return { status: responseStatus.ERROR, message: exception.details[0].message }
+        }
+
+        const { oldPassword, newPassword } = data;
+
+        const user = this.authService.user;
+        const validatedUser = this.authService.validateUser(user.username, oldPassword);
+
+        if (validatedUser) {
+            const passwordHash = await this.authService.getHash(newPassword, user.salt);
+            this.authService.user = await this.userService.changePassword(user._id, passwordHash);
+            return { status: responseStatus.OK }
+        } else {
+            return { status: responseStatus.ERROR, message: "passwords do not match" };
+        }
     }
 
 }
