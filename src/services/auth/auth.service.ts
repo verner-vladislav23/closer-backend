@@ -3,12 +3,18 @@ import { UserService } from '../user/user.service';
 import { User } from 'src/models/User';
 import { SessionService } from '../session/session.service';
 
+const _ = require('lodash')
+
 const crypto = require('crypto');
 
 @Injectable()
 export class AuthService {
 
-    public user?: User | null = null;
+    public authorizedUserID = null;
+
+    public get user() : Promise<User | null> {
+        return this.userService.findById(this.authorizedUserID);
+    }
 
     constructor(private userService: UserService, private sessionService: SessionService) {}
 
@@ -62,21 +68,21 @@ export class AuthService {
         }
     }
 
-    async getAuthorizedUser(token: string): Promise<User | null> {
+    public async setAuthorizedUser(token: string | null) {
+        this.authorizedUserID = null;
         const session = await this.sessionService.findSession(token);
 
         if(!session) {
-            return null;
+            return;
         }
 
         const validated = await this.sessionService.validateSession(session);
         if(!validated) {
             await this.sessionService.deleteSession(session);
-            return null;
+            return;
         }
-        
-        const user = this.userService.findById(session.user_id);
-        return user;
+
+        this.authorizedUserID = session.user_id;
     }
 
     getToken() {

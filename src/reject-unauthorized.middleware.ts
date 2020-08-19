@@ -10,9 +10,9 @@ export class RejectUnauthorizedMiddleware implements NestMiddleware {
 
   constructor(private authService : AuthService) {}
 
-  use(req: any, res: any, next: () => void) {
+  async use(req: any, res: any, next: () => void) {
 
-    if(this.authService.user === null) {
+    if((await this.authService.user) === null) {
       return res.status(401).json({"status":"error","message":"unauthorized"});
     }
 

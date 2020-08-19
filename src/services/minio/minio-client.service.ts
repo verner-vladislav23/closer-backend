@@ -26,14 +26,14 @@ export class MinioClientService {
       throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST)
     }
 
-    let temp_filename = Date.now().toString()
-    let hashedFileName = crypto.createHash('md5').update(temp_filename).digest("hex");
+    let timestamp = Date.now().toString()
+    let hashedFileName = crypto.createHash('md5').update(file.buffer).digest("hex");
     let ext = file.originalname.substring(file.originalname.lastIndexOf('.'), file.originalname.length);
     const metaData = {
       'Content-Type': file.mimetype,
       'X-Amz-Meta-Testing': 1234,
     };
-    let filename = hashedFileName + ext
+    let filename = `avatars/${hashedFileName}_${timestamp}${ext}`
     const fileName: string = `${filename}`;
     const fileBuffer = file.buffer;
     this.client.putObject(baseBucket, fileName, fileBuffer, metaData, function (err, res) {

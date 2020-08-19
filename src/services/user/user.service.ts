@@ -84,7 +84,7 @@ export class UserService {
         return await UserModel.updateOne({
             _id: _id
         }, {
-            firstName: user.username,
+            firstName: user.firstName,
             lastName: user.lastName,
             //description: user.description,
             email: user.email

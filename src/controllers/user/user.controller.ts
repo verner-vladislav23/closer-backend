@@ -40,30 +40,32 @@ export class UserController {
         return { status: responseStatus.OK, data: customUser };
     }
 
-    @Put('change-avatar')
+    @Put('avatar')
     @UseInterceptors(FileInterceptor('avatar'))
     async updateAvatar(@UploadedFile() image: BufferedFile) {
-        const previousImage_url = this.authService.user.avatarUrl;
+        const user = (await this.authService.user);
+        const previousImage_url = user.avatarUrl;
 
         try {
             if (previousImage_url != null) {
                 if (previousImage_url.length > 0) {
                     this.fileUploadService.deleteImage(previousImage_url);
-                    this.authService.user.avatarUrl = "";
+                    user.avatarUrl = "";
                 }
             }
             const image_url = await this.fileUploadService.uploadImage(image);
-            const userId = this.authService.user._id;
+            const userId = user._id;
 
-            this.authService.user = await this.userService.updateAvatarUrl(userId, image_url);
+            await this.userService.updateAvatarUrl(userId, image_url);
             return { status: responseStatus.OK };
         } catch (exception) {
             return { status: responseStatus.ERROR, message: exception.details[0].message };
         }
     }
 
-    @Put('update-profile')
+    @Put('profile')
     async updateProfile(@Request() req) {
+
         const data = req.body;
 
         try {
@@ -72,16 +74,14 @@ export class UserController {
             return { status: responseStatus.ERROR, message: exception.details[0].message };
         }
 
-        const user = this.authService.user;
+        const user = (await this.authService.user);
 
         user.firstName = data.firstName;
         user.lastName = data.lastName;
         user.description = data.description;
         user.email = data.email;
 
-        const userId = this.authService.user._id;
-
-        this.authService.user = await this.userService.updateProfile(userId, user);
+        await this.userService.updateProfile(user._id, user);
 
         return { status: responseStatus.OK };
     }
@@ -92,7 +92,7 @@ export class UserController {
      */
     @Get('near-users')
     async findNear() {
-        const user = this.authService.user;
+        const user = (await this.authService.user);
 
         const usersFound = await this.userService.findNear(user);
         const customUsers = usersFound.map(this.userService.castUser);
@@ -100,7 +100,7 @@ export class UserController {
         return { status: responseStatus.OK, data: customUsers };
     }
 
-    @Post('update-location')
+    @Put('location')
     async updateLocation(@Request() request) {
         const data = request.body;
 
@@ -110,13 +110,13 @@ export class UserController {
             return { status: responseStatus.ERROR, message: exception.details[0].message };
         }
 
-        const user = this.authService.user;
+        const user = (await this.authService.user);
 
-        this.authService.user = await this.userService.updateLocation(user._id, data.location);
+        await this.userService.updateLocation(user._id, data.location);
         return { status: responseStatus.OK };
     }
 
-    @Put('change-password')
+    @Put('password')
     async changePassword(@Request() request) {
         const data = request.body;
 
@@ -128,12 +128,12 @@ export class UserController {
 
         const { oldPassword, newPassword } = data;
 
-        const user = this.authService.user;
+        const user = (await this.authService.user);
         const validatedUser = this.authService.validateUser(user.username, oldPassword);
 
         if (validatedUser) {
             const passwordHash = await this.authService.getHash(newPassword, user.salt);
-            this.authService.user = await this.userService.changePassword(user._id, passwordHash);
+            await this.userService.changePassword(user._id, passwordHash);
             return { status: responseStatus.OK }
         } else {
             return { status: responseStatus.ERROR, message: "passwords do not match" };
