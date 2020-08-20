@@ -71,7 +71,7 @@ export class AuthController {
         }
     }
 
-    @Put('logout')
+    @Post('logout')
     async logout(@Request() req, @Response() res) {
         const authToken = _.get(req.headers, 'x-auth-token', null);
 
