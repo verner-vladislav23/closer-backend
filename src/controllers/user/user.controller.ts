@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Put, Request, UseInterceptors, UploadedFile, UsePipes, Body } from '@nestjs/common';
 import { UserService } from 'src/services/user/user.service';
 import { AuthService } from 'src/services/auth/auth.service';
 import * as Schemes from 'src/schemes/user.schemes';
@@ -6,6 +6,7 @@ import { BufferedFile } from 'src/models/File';
 import { FileInterceptor } from '@nestjs/platform-express'
 import responseStatus from '../responseStatus';
 import { FileUploadService } from 'src/services/minio/file-upload/file-upload.service';
+import { JoiValidationPipe } from 'src/pipes/joi-validation.pipe';
 
 const _ = require('lodash');
 
@@ -64,15 +65,15 @@ export class UserController {
     }
 
     @Put('profile')
-    async updateProfile(@Request() req) {
+    async updateProfile(@Request() req, @Body(new JoiValidationPipe(Schemes.updateProfile)) body) {
 
         const data = req.body;
 
-        try {
-            await Schemes.updateProfile.validateAsync(data);
-        } catch (exception) {
-            return { status: responseStatus.ERROR, message: exception.details[0].message };
-        }
+        // try {
+        //     await Schemes.updateProfile.validateAsync(data);
+        // } catch (exception) {
+        //     return { status: responseStatus.ERROR, message: exception.details[0].message };
+        // }
 
         const user = (await this.authService.user);
 
