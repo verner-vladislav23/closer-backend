@@ -45,19 +45,18 @@ export class UserController {
     @UseInterceptors(FileInterceptor('avatar'))
     async updateAvatar(@UploadedFile() image: BufferedFile) {
         const user = (await this.authService.user);
-        const previousImage_url = user.avatarUrl;
+        const previousImageUrl = user.avatarUrl;
 
         try {
-            if (previousImage_url != null) {
-                if (previousImage_url.length > 0) {
-                    this.fileUploadService.deleteImage(previousImage_url);
+            if (previousImageUrl) {
+                if (previousImageUrl.length > 0) {
+                    this.fileUploadService.deleteImage(previousImageUrl);
                     user.avatarUrl = "";
                 }
             }
-            const image_url = await this.fileUploadService.uploadImage(image);
-            const userId = user._id;
+            const imageUrl = await this.fileUploadService.uploadImage(image);
 
-            await this.userService.updateAvatarUrl(userId, image_url);
+            await this.userService.updateAvatarUrl(user._id, imageUrl);
             return { status: responseStatus.OK };
         } catch (exception) {
             return { status: responseStatus.ERROR, message: exception.details[0].message };
@@ -69,20 +68,11 @@ export class UserController {
 
         const data = req.body;
 
-        // try {
-        //     await Schemes.updateProfile.validateAsync(data);
-        // } catch (exception) {
-        //     return { status: responseStatus.ERROR, message: exception.details[0].message };
-        // }
+        const userId = this.authService.authorizedUserID;
 
-        const user = (await this.authService.user);
+        const { firstName, lastName, description, email } = data;
 
-        user.firstName = data.firstName;
-        user.lastName = data.lastName;
-        user.description = data.description;
-        user.email = data.email;
-
-        await this.userService.updateProfile(user._id, user);
+        await this.userService.updateProfile(userId, firstName, lastName, description, email);
 
         return { status: responseStatus.OK };
     }
@@ -133,7 +123,7 @@ export class UserController {
         const validatedUser = this.authService.validateUser(user.username, oldPassword);
 
         if (validatedUser) {
-            const passwordHash = await this.authService.getHash(newPassword, user.salt);
+            const passwordHash = this.authService.getHash(newPassword, user.salt);
             await this.userService.changePassword(user._id, passwordHash);
             return { status: responseStatus.OK }
         } else {

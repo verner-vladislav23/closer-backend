@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import UserModel, { User } from 'src/models/User'
 import { ObjectID } from 'mongodb';
 import * as mongoose from 'mongoose';
-import { AuthService } from '../auth/auth.service';
 const _ = require('lodash')
 
 @Injectable()
@@ -80,14 +79,15 @@ export class UserService {
      * @param _id 
      * @param user 
      */
-    public async updateProfile(_id: mongoose.Types.ObjectId, user: User) {
+    public async updateProfile(_id: mongoose.Types.ObjectId, firstName: string, lastName: string,
+        description: string, email: string) {
         return await UserModel.updateOne({
-            _id: _id
+            _id
         }, {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            //description: user.description,
-            email: user.email
+            firstName,
+            lastName,
+            description,
+            email
         });
     }
 

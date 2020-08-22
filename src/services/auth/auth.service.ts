@@ -12,11 +12,11 @@ export class AuthService {
 
     public authorizedUserID = null;
 
-    public get user() : Promise<User | null> {
+    public get user(): Promise<User | null> {
         return this.userService.findById(this.authorizedUserID);
     }
 
-    constructor(private userService: UserService, private sessionService: SessionService) {}
+    constructor(private userService: UserService, private sessionService: SessionService) { }
 
     /**
      * Validate User
@@ -30,7 +30,7 @@ export class AuthService {
             return false;
         }
 
-        const passwordHash = await this.getHash(pass, user.salt);
+        const passwordHash = this.getHash(pass, user.salt);
 
         if (passwordHash != user.passwordHash) {
             return false;
@@ -39,14 +39,14 @@ export class AuthService {
         return true;
     }
 
-    async getHash(password: string, salt: string) {
+    getHash(password: string, salt: string) {
         return crypto.createHash('sha256').update(password + salt).digest('base64');
     }
 
     async register(firstName: string, lastName: string, username: string, password: string): Promise<string | null> {
 
         const salt = crypto.randomBytes(32).toString('base64');
-        const passwordHash = await this.getHash(password, salt);
+        const passwordHash = this.getHash(password, salt);
 
         let user = new User();
 
@@ -72,12 +72,12 @@ export class AuthService {
         this.authorizedUserID = null;
         const session = await this.sessionService.findSession(token);
 
-        if(!session) {
+        if (!session) {
             return;
         }
 
         const validated = await this.sessionService.validateSession(session);
-        if(!validated) {
+        if (!validated) {
             await this.sessionService.deleteSession(session);
             return;
         }

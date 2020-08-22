@@ -13,8 +13,8 @@ export class FileUploadService {
      * @param image 
      */
     async uploadImage(image: BufferedFile) {
-        const uploaded_image = await this.minioClientService.upload(image)
-        return uploaded_image.url;
+        const uploadedImage = await this.minioClientService.upload(image)
+        return uploadedImage.url;
     }
 
     async deleteImage(image_url: string) {
