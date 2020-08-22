@@ -92,30 +92,18 @@ export class UserController {
     }
 
     @Put('location')
-    async updateLocation(@Request() request) {
+    async updateLocation(@Request() request, @Body(new JoiValidationPipe(Schemes.updateLocation)) body) {
         const data = request.body;
 
-        try {
-            await Schemes.updateLocation.validateAsync(data);
-        } catch (exception) {
-            return { status: responseStatus.ERROR, message: exception.details[0].message };
-        }
+        const userId = await this.authService.authorizedUserID;
 
-        const user = (await this.authService.user);
-
-        await this.userService.updateLocation(user._id, data.location);
+        await this.userService.updateLocation(userId, data.location);
         return { status: responseStatus.OK };
     }
 
     @Put('password')
-    async changePassword(@Request() request) {
+    async changePassword(@Request() request, @Body(new JoiValidationPipe(Schemes.changePassword)) body) {
         const data = request.body;
-
-        try {
-            await Schemes.changePassword.validateAsync(data);
-        } catch (exception) {
-            return { status: responseStatus.ERROR, message: exception.details[0].message }
-        }
 
         const { oldPassword, newPassword } = data;
 
