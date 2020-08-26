@@ -2,7 +2,9 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { MinioService } from 'nestjs-minio-client';
 import MinioConfig from 'src/config/minio';
 import { BufferedFile } from 'src/models/File';
-import * as crypto from 'crypto'
+import * as crypto from 'crypto';
+
+const sharp = require('sharp');
 
 @Injectable()
 export class MinioClientService {
@@ -28,17 +30,19 @@ export class MinioClientService {
 
     let timestamp = Date.now().toString()
     let hashedFileName = crypto.createHash('md5').update(file.buffer).digest("hex");
-    let ext = file.originalname.substring(file.originalname.lastIndexOf('.'), file.originalname.length);
+    let ext = '.png';
     const metaData = {
       'Content-Type': file.mimetype,
-      'X-Amz-Meta-Testing': 1234,
     };
-    let filename = `avatars/${hashedFileName}_${timestamp}${ext}`
-    const fileName: string = `${filename}`;
-    const fileBuffer = file.buffer;
-    this.client.putObject(baseBucket, fileName, fileBuffer, metaData, function (err, res) {
-      if (err) throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST)
-    })
+
+    let fileName = `avatars/${hashedFileName}_${timestamp}${ext}`
+
+    const sharpedFileBuffer = await sharp(file.buffer).png().toBuffer();
+
+    this.client.putObject(baseBucket, fileName, sharpedFileBuffer,
+      metaData, function (err, res) {
+        if (err) throw new HttpException('Error uploading file', HttpStatus.BAD_REQUEST)
+      })
 
     return {
       //url: `${MinioConfig.endPoint}:${MinioConfig.port}/${MinioConfig.bucket}/${filename}`
