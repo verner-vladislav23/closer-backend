@@ -25,7 +25,7 @@ export class UserService {
 
         const location = _.get(user, 'location', null)
 
-        if(location === null) {
+        if (location === null) {
             return []
         }
 
@@ -54,6 +54,7 @@ export class UserService {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
+            description: user.description,
             email: user.email
         }
     }
@@ -69,19 +70,47 @@ export class UserService {
         return userBD;
     }
 
+    public async updateAvatarUrl(_id: mongoose.Types.ObjectId, avatarUrl: string) {
+        return await UserModel.updateOne({ _id }, { avatarUrl });
+    }
+
+    /**
+     * Update user profile
+     * @param _id 
+     * @param user 
+     */
+    public async updateProfile(_id: mongoose.Types.ObjectId, firstName: string, lastName: string,
+        description: string, email: string) {
+        return await UserModel.updateOne({
+            _id
+        }, {
+            firstName,
+            lastName,
+            description,
+            email
+        });
+    }
 
     /**
      * Update user location
      * @param user 
      */
-    public async updateLocation(_id: mongoose.Types.ObjectId, coordinates: {longitude: number, latitude: number}) {
-        const location: {type: string, coordinates: [number, number]} = {
+    public async updateLocation(_id: mongoose.Types.ObjectId, coordinates: { longitude: number, latitude: number }) {
+        const location: { type: string, coordinates: [number, number] } = {
             type: 'Point',
             coordinates: [coordinates.longitude, coordinates.latitude]
         };
-        return await UserModel.updateOne({_id}, { location } );
+        return await UserModel.updateOne({ _id }, { location });
     }
 
+    /**
+     * Change user password
+     * @param _id 
+     * @param passwordHash 
+     */
+    public async changePassword(_id: mongoose.Types.ObjectId, passwordHash: string) {
+        return await UserModel.updateOne({ _id }, { passwordHash });
+    }
 
     /**
      * Delete User by id

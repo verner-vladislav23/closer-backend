@@ -1,10 +1,10 @@
-import { Controller, Post, Request, Put, Response } from '@nestjs/common';
+import { Controller, Post, Request, Put, Response, Body } from '@nestjs/common';
 import { AuthService } from 'src/services/auth/auth.service';
-import ResponseStatus from '../responseStatus'
 import { SessionService } from 'src/services/session/session.service';
 import { UserService } from 'src/services/user/user.service';
 import * as Schemes from 'src/schemes/user.schemes';
 import responseStatus from '../responseStatus';
+import { JoiValidationPipe } from 'src/pipes/joi-validation.pipe';
 
 
 const _ = require('lodash');
@@ -21,15 +21,8 @@ export class AuthController {
      * @param request
      */
     @Post('login')
-    async login(@Request() req) {
+    async login(@Request() req, @Body(new JoiValidationPipe(Schemes.loginSchema)) body) {
         const data = req.body;
-
-        try {
-            await Schemes.loginSchema.validateAsync(data);
-        } catch (exception) {
-            return { status: ResponseStatus.ERROR, message: exception.details[0].message };
-        }
-
         const { username, password } = data;
 
         const userValidated = await this.authService.validateUser(username, password);
@@ -42,7 +35,7 @@ export class AuthController {
             return { status: responseStatus.OK, data: token }
         }
         else {
-            return { status: ResponseStatus.ERROR, message: 'Wrong username or password' };
+            return { status: responseStatus.ERROR, message: 'Wrong username or password' };
         }
     }
 
@@ -51,27 +44,19 @@ export class AuthController {
      * @param req 
      */
     @Post('register')
-    async register(@Request() req) {
+    async register(@Request() req, @Body(new JoiValidationPipe(Schemes.registerSchema)) body) {
         const data = req.body;
-
-        try {
-            await Schemes.registerSchema.validateAsync(data);
-        } catch (exception) {
-            return { status: ResponseStatus.ERROR, message: exception.details[0].message };
-        }
-
         const { firstName, lastName, username, password } = data;
 
         const token = await this.authService.register(firstName, lastName, username, password);
         if (token) {
-            return { status: ResponseStatus.OK, data: token }
-        }
-        else {
-            return { status: ResponseStatus.ERROR, message: 'User already created' };
+            return { status: responseStatus.OK, data: token }
+        } else {
+            return { status: responseStatus.ERROR, message: 'User already created' };
         }
     }
 
-    @Put('logout')
+    @Post('logout')
     async logout(@Request() req, @Response() res) {
         const authToken = _.get(req.headers, 'x-auth-token', null);
 
@@ -86,7 +71,7 @@ export class AuthController {
         }
 
         res.status(401);
-        res.json({ status: ResponseStatus.ERROR, message: 'unauthorized' });
+        res.json({ status: responseStatus.ERROR, message: 'unauthorized' });
         res.send();
         return;
     }

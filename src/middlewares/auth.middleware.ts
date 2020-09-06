@@ -14,9 +14,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: Function) {
     
     const token = _.get(req.headers, 'x-auth-token', null);
-    if(token !== null) {
-      this.authService.user = await this.authService.getAuthorizedUser(token);
-    }
+    await this.authService.setAuthorizedUser(token);
 
     next();
   }

@@ -24,6 +24,12 @@ export class User extends Typegoose {
     public lastName: string;
 
     @prop()
+    public avatarUrl: string;
+
+    @prop()
+    public description: string;
+
+    @prop()
     public username: string;
 
     @prop()
